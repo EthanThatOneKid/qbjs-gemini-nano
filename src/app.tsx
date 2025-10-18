@@ -2,11 +2,23 @@
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import type { ChatProps, MessageProps } from "@chatui/core";
-import Chat, { Bubble, useMessages } from "@chatui/core";
+import type { MessageProps } from "@chatui/core";
+import { Bubble, useMessages } from "@chatui/core";
+import { ChatComponent } from "./chatui.tsx";
 
-// Type assertion for Chat component
-const ChatComponent = Chat as React.ComponentType<ChatProps>;
+globalThis.addEventListener("DOMContentLoaded", () => {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    console.error(
+      "Target container is not a DOM element. Make sure there's a div with id='root' in your HTML.",
+    );
+
+    throw new Error("Root element not found!");
+  }
+
+  const root = createRoot(rootElement);
+  root.render(<App />);
+});
 
 function App() {
   const { messages, appendMsg } = useMessages([
@@ -51,10 +63,13 @@ function App() {
 
     // Render based on message type
     switch (type) {
-      case "text":
+      case "text": {
         return <Bubble content={content.text} />;
-      default:
+      }
+
+      default: {
         return null;
+      }
     }
   }
 
@@ -67,31 +82,3 @@ function App() {
     />
   );
 }
-
-// Mount the app to the DOM following React createRoot best practices
-const rootElement = document.getElementById("root");
-if (!rootElement) {
-  console.error(
-    "Target container is not a DOM element. Make sure there's a div with id='root' in your HTML.",
-  );
-  throw new Error("Root element not found!");
-}
-
-// Create root with error handling options as recommended in React docs
-const root = createRoot(rootElement, {
-  onUncaughtError: (error: Error, errorInfo: { componentStack: string }) => {
-    console.error("Uncaught error:", error);
-    console.error("Component stack:", errorInfo.componentStack);
-  },
-  onCaughtError: (error: Error, errorInfo: { componentStack: string }) => {
-    console.error("Caught error:", error);
-    console.error("Component stack:", errorInfo.componentStack);
-  },
-  onRecoverableError: (error: Error, errorInfo: { componentStack: string }) => {
-    console.warn("Recoverable error:", error);
-    console.warn("Component stack:", errorInfo.componentStack);
-  },
-});
-
-// Render the app
-root.render(<App />);

@@ -25,5 +25,6 @@
       "command": "deno check",
       "dependencies": ["install"]
     }
-  }
+  },
+  "exclude": ["dist"]
 }
