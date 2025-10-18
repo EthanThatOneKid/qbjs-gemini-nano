@@ -1,8 +1,29 @@
 {
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@chatui/core": "npm:@chatui/core@^3.3.0",
+    "react": "npm:react@^19.2.0",
+    "react-dom": "npm:react-dom@^19.2.0"
+  },
   "tasks": {
+    "install": {
+      "description": "Install the dependencies",
+      "command": "deno install --allow-scripts"
+    },
+    "generate": {
+      "description": "Bundle the client-side app",
+      "command": "deno bundle --outdir dist --platform=browser src/app.tsx",
+      "dependencies": ["install"]
+    },
     "start": {
       "description": "Start the project",
-      "command": "deno -A jsr:@std/http/file-server"
+      "command": "deno -A jsr:@std/http/file-server",
+      "dependencies": ["generate"]
+    },
+    "precommit": {
+      "description": "Check the code",
+      "command": "deno check",
+      "dependencies": ["install"]
     }
   }
 }
