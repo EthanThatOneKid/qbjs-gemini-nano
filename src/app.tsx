@@ -2,20 +2,8 @@
 
 import React from "react";
 import { createRoot } from "react-dom/client";
+import type { ChatProps, MessageProps } from "@chatui/core";
 import Chat, { Bubble, useMessages } from "@chatui/core";
-
-interface MessageProps {
-  type: string;
-  content: { text: string };
-  position?: "left" | "right";
-}
-
-interface ChatProps {
-  navbar?: { title: string };
-  messages: MessageProps[];
-  renderMessageContent: (msg: MessageProps) => React.ReactNode;
-  onSend: (type: string, val: string) => void;
-}
 
 // Type assertion for Chat component
 const ChatComponent = Chat as React.ComponentType<ChatProps>;
