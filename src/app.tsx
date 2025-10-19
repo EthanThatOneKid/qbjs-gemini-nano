@@ -4,7 +4,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import type { MessageProps } from "@chatui/core";
 import { Bubble, useMessages } from "@chatui/core";
-import { ChatComponent } from "./chatui.tsx";
+import { ChatComponent } from "./components/chatui.tsx";
 
 globalThis.addEventListener("DOMContentLoaded", () => {
   const rootElement = document.getElementById("root");

@@ -23,7 +23,7 @@
     "precommit": {
       "description": "Check the code",
       "command": "deno check",
-      "dependencies": ["install"]
+      "dependencies": ["generate", "install"]
     }
   },
   "exclude": ["dist"]
