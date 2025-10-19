@@ -1,42 +1,39 @@
+import { parse } from "@std/csv/parse";
+import { ProgressBar } from "@std/cli/unstable-progress-bar";
+import type { FewShotSample } from "./src/program.ts";
+
 if (import.meta.main) {
   await downloadSamples();
 }
 
-interface Sample {
-  input: string;
-  output: string;
-}
-
 async function downloadSamples() {
-  const samples: Sample[] = [];
+  const fewShot: FewShotSample[] = [];
   const samplesResponse = await fetch(
     "https://raw.githubusercontent.com/boxgaming/qbjs-samples/refs/heads/main/samples.txt",
   );
   const samplesText = await samplesResponse.text();
-  for (const { 0: filename, 3: description } of parseSamples(samplesText)) {
-    if (!filename.endsWith(".bas")) {
-      continue;
-    }
-
+  const samples = parse(
+    samplesText,
+    {
+      columns: ["filename", "label", "author", "description", "tags"],
+      trimLeadingSpace: true,
+    },
+  ).filter((sample) => sample.filename.endsWith(".bas"));
+  const bar = new ProgressBar({ max: samples.length });
+  for (const sample of samples) {
     const response = await fetch(
-      `https://raw.githubusercontent.com/boxgaming/qbjs-samples/refs/heads/main/samples/${filename}`,
+      `https://raw.githubusercontent.com/boxgaming/qbjs-samples/refs/heads/main/samples/${sample.filename}`,
     );
-    const code = await response.text();
-    samples.push({ input: description, output: code });
+    const output = await response.text();
+    const input = sample.description || sample.label;
+    const fewShotSample: FewShotSample = { input, output };
+    fewShot.push(fewShotSample);
+    bar.value++;
   }
 
+  await bar.stop();
   await Deno.writeTextFile(
     "./src/samples.json",
-    JSON.stringify(samples, null, 2) + "\n",
+    JSON.stringify(fewShot, null, 2) + "\n",
   );
-}
-
-function parseSamples(text: string) {
-  return text
-    .split("\n")
-    .map((line) =>
-      line
-        .split(",")
-        .map((cell) => cell.trim())
-    );
 }

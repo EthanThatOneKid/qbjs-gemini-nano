@@ -5,8 +5,6 @@ import { createRoot } from "react-dom/client";
 import type { MessageProps } from "@chatui/core";
 import { Bubble, useMessages } from "@chatui/core";
 import { ChatComponent } from "./components/chatui.tsx";
-import { generateProgramWithLM } from "./program.ts";
-import { makeQbjsUrl } from "./qbjs.ts";
 
 globalThis.addEventListener("DOMContentLoaded", () => {
   const rootElement = document.getElementById("root");
@@ -49,35 +47,14 @@ function App() {
         content: { text: val },
         position: "right",
       });
-
-      try {
-        // Generate QuickBasic program
-        const program = await generateProgramWithLM(val);
-
-        // Create QBJS URL
-        const qbjsUrl = makeQbjsUrl(program, "play");
-
-        // Send the generated program as a response
-        appendMsg({
-          type: "text",
-          content: {
-            text:
-              `Here's your QuickBasic program:\n\n\`\`\`qbasic\n${program}\n\`\`\`\n\n[Run it on QBJS](${qbjsUrl.toString()})`,
-          },
-          position: "left",
-        });
-      } catch (error) {
-        console.error("Error generating program:", error);
-        appendMsg({
-          type: "text",
-          content: {
-            text:
-              "Sorry, I couldn't generate a program right now. Please try again.",
-          },
-          position: "left",
-        });
-      }
     }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    appendMsg({
+      type: "text",
+      content: { text: "Generating program..." },
+      position: "left",
+    });
   }
 
   function renderMessageContent(msg: MessageProps): React.ReactNode {
@@ -97,7 +74,7 @@ function App() {
 
   return (
     <ChatComponent
-      navbar={{ title: "QBJS QuickBasic Generator" }}
+      navbar={{ title: "QBJS Gemini Nano" }}
       messages={messages}
       renderMessageContent={renderMessageContent}
       onSend={handleSend}
