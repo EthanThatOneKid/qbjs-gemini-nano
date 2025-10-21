@@ -71,6 +71,14 @@ export function logWarning(message: string, error?: unknown): void {
 }
 
 /**
+ * Checks if a string contains code fences
+ */
+export function hasCodeFences(text: string): boolean {
+  const fenceRegex = /```([a-zA-Z0-9+]*)?\n([\s\S]*?)\n```/;
+  return fenceRegex.test(text);
+}
+
+/**
  * Trims code fences from a string and returns the clean code
  */
 export function trimCodeFences(text: string): string {

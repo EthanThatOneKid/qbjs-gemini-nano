@@ -18,6 +18,7 @@ import {
   createLoadingMessage,
   createMessage,
   createSuccessMessage,
+  hasCodeFences,
   logError,
   logInit,
   logWarning,
@@ -94,15 +95,17 @@ function LanguageModelErrorBoundary(
   }, []);
 
   if (hasError) {
-    return React.createElement(
-      "div",
-      { style: { padding: "20px", textAlign: "center" } },
-      React.createElement("h2", null, "Failed to initialize AI model"),
-      React.createElement("p", null, error?.message),
-      React.createElement("button", {
-        type: "button",
-        onClick: () => globalThis.location.reload(),
-      }, "Reload"),
+    return (
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <h2>Failed to initialize AI model</h2>
+        <p>{error?.message}</p>
+        <button
+          type="button"
+          onClick={() => globalThis.location.reload()}
+        >
+          Reload
+        </button>
+      </div>
     );
   }
 
@@ -117,7 +120,9 @@ if (!rootElement) {
 
 const root = createRoot(rootElement);
 root.render(
-  React.createElement(LanguageModelErrorBoundary, {}, React.createElement(App)),
+  <LanguageModelErrorBoundary>
+    <App />
+  </LanguageModelErrorBoundary>,
 );
 
 function App() {
@@ -201,10 +206,7 @@ function App() {
 
       if (result) {
         // Check if the result contains code fences
-        const fenceRegex = /```([a-zA-Z0-9+]*)?\n([\s\S]*?)\n```/;
-        const hasCodeFences = fenceRegex.test(result);
-
-        if (hasCodeFences) {
+        if (hasCodeFences(result)) {
           // Trim the code fences and create a code message type
           const cleanCode = trimCodeFences(result);
           appendMsg({
@@ -288,10 +290,7 @@ function App() {
 
       if (result) {
         // Check if the result contains code fences
-        const fenceRegex = /```([a-zA-Z0-9+]*)?\n([\s\S]*?)\n```/;
-        const hasCodeFences = fenceRegex.test(result);
-
-        if (hasCodeFences) {
+        if (hasCodeFences(result)) {
           // Trim the code fences and create a code message type
           const cleanCode = trimCodeFences(result);
           appendMsg({
@@ -299,24 +298,6 @@ function App() {
             content: { text: cleanCode, originalPrompt: val },
             position: "left",
           });
-        } else {
-          // Check if the result looks like QBASIC code (even without fences)
-          const qbasicKeywords =
-            /\b(PRINT|INPUT|LET|IF|THEN|ELSE|END|FOR|NEXT|WHILE|WEND|DO|LOOP|SUB|FUNCTION|DIM|AS|INTEGER|STRING|SINGLE|DOUBLE|LONG|CIRCLE|LINE|PSET|CLS|SCREEN|COLOR|LOCATE|BEEP|SLEEP|RND|INT|VAL|STR|LEN|LEFT|RIGHT|MID|INSTR|UCASE|LCASE|TRIM|SPACE|TAB|CHR|ASC|SQR|ABS|SIN|COS|TAN|LOG|EXP|FIX|CINT|CDBL|CSNG|CSTR)\b/i;
-          const hasQbasicCode = qbasicKeywords.test(result) &&
-            result.length > 20;
-
-          if (hasQbasicCode) {
-            // Treat as QBASIC code and render in iframe
-            appendMsg({
-              type: "code",
-              content: { text: result, originalPrompt: val },
-              position: "left",
-            });
-          } else {
-            // Create a regular text message
-            appendMsg(createMessage(result));
-          }
         }
       } else {
         appendMsg(createMessage("No response received from the AI model."));
@@ -347,61 +328,60 @@ function App() {
         const qbjsUrl = makeQbjsUrl(code, "auto");
         const qbjsViewUrl = makeQbjsUrl(code, undefined);
 
-        return React.createElement(
-          Bubble,
-          null,
-          React.createElement(
-            "div",
-            { style: { display: "flex", flexDirection: "column", gap: "8px" } },
-            React.createElement("iframe", {
-              src: qbjsUrl.toString(),
-              width: "100%",
-              height: "400",
-              frameBorder: "0",
-              allow: "fullscreen; clipboard-write; clipboard-read; web-share",
-              sandbox:
-                "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation",
-              loading: "lazy",
-              title: "QBJS Code Editor",
-              style: {
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                pointerEvents: "auto",
-                userSelect: "auto",
-              },
-            }),
-            React.createElement(
-              "div",
-              {
-                style: {
+        return (
+          <Bubble>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+            >
+              <iframe
+                src={qbjsUrl.toString()}
+                width="600"
+                height="400"
+                allow="fullscreen; clipboard-write; clipboard-read; web-share"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+                loading="lazy"
+                title="QBJS Code Editor"
+                style={{
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  pointerEvents: "auto",
+                  userSelect: "auto",
+                }}
+              />
+              <div
+                style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                },
-              },
-              React.createElement("a", {
-                href: qbjsViewUrl.toString(),
-                target: "_blank",
-                rel: "noopener noreferrer",
-                style: {
-                  color: "#1890ff",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                },
-                children: "🔗 View in QBJS.org",
-              }),
-              originalPrompt &&
-                React.createElement(Button, {
-                  size: "sm",
-                  color: "primary",
-                  onClick: () => handleRetry(originalPrompt),
-                  children: "🔄 Regenerate",
-                }),
-            ),
-          ),
+                }}
+              >
+                <a
+                  href={qbjsViewUrl.toString()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#1890ff",
+                    textDecoration: "none",
+                    fontSize: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
+                >
+                  🔗 View in QBJS.org
+                </a>
+                {originalPrompt && (
+                  <Button
+                    size="sm"
+                    color="primary"
+                    onClick={() => handleRetry(originalPrompt)}
+                  >
+                    🔄 Regenerate
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Bubble>
         );
       }
 

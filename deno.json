@@ -1,5 +1,9 @@
 {
   "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "React.createElement"
+  },
   "imports": {
     "@chatui/core": "npm:@chatui/core@^3.3.0",
     "@std/cli": "jsr:@std/cli@^1.0.23",
