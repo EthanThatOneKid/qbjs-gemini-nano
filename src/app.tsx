@@ -9,11 +9,6 @@ import { getRootSession } from "./program.ts";
 import { ChatComponent } from "./components/chatui.tsx";
 import { makeQbjsUrl } from "./qbjs.ts";
 import {
-  checkLanguageModelAvailability,
-  cloneLanguageModelSession,
-  sendPrompt,
-} from "./chrome-ai.ts";
-import {
   createErrorMessage,
   createLoadingMessage,
   createMessage,
@@ -196,7 +191,11 @@ function App() {
     setTypingMessageId(typingId);
 
     try {
-      const result = await sendPrompt(session, originalPrompt);
+      const result = await sendPrompt(
+        session,
+        originalPrompt,
+        'Print "Hello, World!"',
+      );
 
       // Remove typing indicator
       if (typingMessageId) {
@@ -280,7 +279,7 @@ function App() {
     setTypingMessageId(typingId);
 
     try {
-      const result = await sendPrompt(session, val);
+      const result = await sendPrompt(session, val, 'Print "Hello, World!"');
 
       // Remove typing indicator
       if (typingMessageId) {
@@ -331,17 +330,29 @@ function App() {
         return (
           <Bubble>
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                width: "600px",
+                maxWidth: "100%",
+                overflow: "hidden",
+              }}
             >
               <iframe
                 src={qbjsUrl.toString()}
                 width="600"
                 height="400"
+                frameBorder="0"
                 allow="fullscreen; clipboard-write; clipboard-read; web-share"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
                 loading="lazy"
                 title="QBJS Code Editor"
                 style={{
+                  width: "600px",
+                  height: "400px",
+                  display: "block",
+                  boxSizing: "border-box",
                   border: "1px solid #ccc",
                   borderRadius: "8px",
                   pointerEvents: "auto",
@@ -353,6 +364,9 @@ function App() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  gap: "8px",
+                  width: "100%",
+                  flexWrap: "wrap",
                 }}
               >
                 <a
